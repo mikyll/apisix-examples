@@ -1,0 +1,56 @@
+services:
+  etcd:
+    container_name: etcd-traditional-generic
+    image: bitnami/etcd:latest
+    restart: no
+    environment:
+      ALLOW_NONE_AUTHENTICATION: yes
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd-traditional-generic:2379
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+    ports:
+      - "2379:2379"
+    healthcheck:
+      test: "etcdctl endpoint health"
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    networks:
+      apisix:
+
+  apisix:
+    container_name: apisix-traditional-generic
+    image: apache/apisix:latest
+    restart: no
+    depends_on:
+      etcd:
+        condition: service_healthy
+    volumes:
+      - ./conf_apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+    ports:
+      - "9080:9080/tcp"
+      - "9443:9443/tcp"
+      - "9180:9180/tcp"
+    networks:
+      apisix:
+
+  httpbin:
+    container_name: httpbin-traditional-generic
+    image: kennethreitz/httpbin:latest
+    restart: no
+    ports:
+      - "3000:80/tcp"
+    networks:
+      apisix:
+
+  echo:
+    container_name: echo-traditional-generic
+    image: jmalloc/echo-server:latest
+    restart: no
+    ports:
+      - "3001:8080/tcp"
+    networks:
+      apisix:
+
+networks:
+  apisix:
+    driver: bridge
