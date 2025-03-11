@@ -1,7 +1,6 @@
 # APISIX Dashboard
 
-TODO
-
+This example shows how to setup the APISIX Dashboard, in Traditional deployment mode.
 
 ## Setup
 
