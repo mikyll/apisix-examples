@@ -1,6 +1,6 @@
 # APISIX Docker Traditional
 
-This example shows a simple APISIX setup in Docker, using Traditional deployment mode. In this mode, APISIX resources are configured by sending HTTP requests to Admin API.
+This example shows a simple APISIX setup in Docker, using Traditional deployment mode. In this mode, a single APISIX Docker container acts as both the control plane and the data plane. APISIX resources are configured by sending HTTP requests to Admin API.
 
 ## Setup
 
