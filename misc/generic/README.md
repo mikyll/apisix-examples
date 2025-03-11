@@ -1,6 +1,6 @@
 # APISIX Generic
 
-This example shows some interesting stuff you can do with APISIX Route resource.
+This example shows some interesting stuff you can do with APISIX Route resource, in Standalone deployment mode.
 
 ## Setup
 
