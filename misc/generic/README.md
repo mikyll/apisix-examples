@@ -51,13 +51,13 @@ curl "localhost:9080/httpbin/uuid"
 Wrong method (GET):
 
 ```bash
-curl -X GET "localhost:9080/method"
+curl -X GET "localhost:9080/methods"
 ```
 
 Correct method (PUT):
 
 ```bash
-curl -X PUT "localhost:9080/method"
+curl -X PUT "localhost:9080/methods"
 ```
 
 ### Multiple URIs

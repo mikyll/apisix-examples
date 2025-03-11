@@ -40,8 +40,8 @@ routes:
           - /$1
   
   # method
-  - id: method
-    uri: /method
+  - id: methods
+    uri: /methods
     upstream_id: internal_httpbin
     methods: [ PUT ]
     plugins:
