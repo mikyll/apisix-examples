@@ -1,8 +1,24 @@
 <div align="center">
 
+[![APISIX][apisix-shield]][apisix-url]
+[![NGINX][nginx-shield]][nginx-url]
+[![Lua][lua-shield]][lua-url]
+[![Perl][perl-shield]][perl-url]
+[![YAML][yaml-shield]][yaml-url]
+
 # APISIX Examples
 
 APISIX examples for different setups, configurations and plugins usage.
+
+[APISIX Source](https://github.com/apache/apisix)
+·
+[APISIX Docs](https://apisix.apache.org/)
+|
+[Deployment Modes](https://apisix.apache.org/docs/apisix/deployment-modes/)
+|
+[Admin API](https://apisix.apache.org/docs/apisix/admin-api/)
+|
+[Plugin Develop](https://apisix.apache.org/docs/apisix/plugin-develop/)
 
 </div>
 
@@ -79,3 +95,16 @@ Folder: [`misc/plugin_authentication/`](misc/plugin_authentication/README.md)
 #### Plugin Authorization
 
 Folder: [`misc/plugin_authorization/`](misc/plugin_authorization/README.md)
+
+<!-- GitHub Shields -->
+
+[apisix-shield]: https://custom-icon-badges.demolab.com/badge/APISIX-grey.svg?logo=apisix_logo
+[apisix-url]: https://apisix.apache.org/
+[nginx-shield]: https://img.shields.io/badge/NGiNX-%23009639.svg?logo=nginx
+[nginx-url]: https://nginx.org/en/
+[lua-shield]: https://img.shields.io/badge/Lua-%232C2D72.svg?logo=lua&logoColor=white
+[lua-url]: https://www.lua.org/
+[perl-shield]: https://img.shields.io/badge/Perl-%2339457E.svg?logo=perl&logoColor=white
+[perl-url]: https://www.perl.org/
+[yaml-shield]: https://img.shields.io/badge/YAML-%23ffffff.svg?logo=yaml&logoColor=151515
+[yaml-url]: https://yaml.org/
