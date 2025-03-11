@@ -1,0 +1,28 @@
+services:
+  apisix:
+    container_name: apisix-custom
+    image: apache/apisix:custom
+    restart: no
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./conf/config.yaml:/home/apisix/apisix_src/conf/config.yaml
+    ports:
+      - "9080:9080/tcp"
+      - "9180:9180/tcp"
+      - "9443:9443/tcp"
+    networks:
+      apisix:
+
+  httpbin:
+    container_name: httpbin-custom
+    image: kennethreitz/httpbin:latest
+    restart: no
+    ports:
+      - "3000:80/tcp"
+    networks:
+      apisix:
+
+networks:
+  apisix:
+    driver: bridge
