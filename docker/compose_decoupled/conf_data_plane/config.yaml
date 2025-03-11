@@ -1,0 +1,18 @@
+apisix:
+  router:
+    http: radixtree_uri_with_parameter
+
+  node_listen: 9080
+  
+deployment:
+  role: data_plane
+  role_data_plane:
+    config_provider: etcd
+
+  etcd:
+    host:
+      - http://etcd-decoupled:2379
+    prefix: "/apisix"
+    timeout: 30
+    
+#END

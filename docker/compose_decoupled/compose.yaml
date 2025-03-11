@@ -1,0 +1,62 @@
+services:
+  etcd:
+    container_name: etcd-decoupled
+    image: bitnami/etcd:latest
+    restart: no
+    environment:
+      ALLOW_NONE_AUTHENTICATION: yes
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd-decoupled:2379
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+    ports:
+      - "2379:2379"
+    healthcheck:
+      test: "etcdctl endpoint health"
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    networks:
+      apisix:
+
+  apisix-data-plane:
+    container_name: apisix-decoupled-data-plane
+    image: apache/apisix:latest
+    restart: no
+    depends_on:
+      etcd:
+        condition: service_healthy
+    volumes:
+      - ./conf_data_plane/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+    ports:
+      - "9080:9080/tcp"
+      - "9443:9443/tcp"
+    networks:
+      apisix:
+
+  apisix-control-plane:
+    container_name: apisix-decoupled-control-plane
+    image: apache/apisix:latest
+    restart: no
+    depends_on:
+      etcd:
+        condition: service_healthy
+    volumes:
+      - ./conf_control_plane/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+    ports:
+      - "9180:9180/tcp"
+      - "9091:9091/tcp"
+      - "9092:9092/tcp"
+    networks:
+      apisix:
+
+  httpbin:
+    container_name: httpbin-decoupled
+    image: kennethreitz/httpbin:latest
+    restart: no
+    ports:
+      - "3000:80/tcp"
+    networks:
+      apisix:
+
+networks:
+  apisix:
+    driver: bridge
