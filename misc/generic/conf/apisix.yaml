@@ -1,0 +1,158 @@
+upstreams:
+  # Upstream to internal service httpbin
+  - id: internal_httpbin
+    nodes:
+      "httpbin-generic:80": 1
+    type: roundrobin
+
+  # Upstream to internal service echo
+  - id: internal_echo
+    nodes:
+      "echo-generic:8080": 1
+    type: roundrobin
+  
+  # Upstream to external service
+  - id: external_httpbin
+    scheme: https
+    nodes:
+      "httpbin.org": 1
+    type: roundrobin
+
+routes:
+  # Simple route to internal service
+  - id: base_internal
+    uri: /anything
+    upstream_id: internal_httpbin
+
+  # Simple route to external service
+  - id: base_external
+    uri: /get
+    upstream_id: external_httpbin
+    methods: ["GET"]
+  
+  # Rewrite URI
+  - id: httpbin_internal
+    uri: /httpbin/*
+    upstream_id: internal_httpbin
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - ^/httpbin/(.*)
+          - /$1
+
+  # Multiple uris
+  - id: multiple_uris
+    uris: 
+      - /multiple_uris
+      - /v2/multiple_uris
+      - /api/multiple_uris
+    upstream_id: internal_httpbin
+    plugins:
+      proxy-rewrite:
+        uri: /anything
+
+  # hosts
+  - id: hosts
+    uri: /hosts
+    upstream_id: internal_httpbin
+    hosts:
+      - "local.httpbin.org"
+      - "*.apache.org"
+    plugins:
+      proxy-rewrite:
+        uri: /anything
+
+  # priority (2 routes with same uri but different priority)
+  - id: priority1
+    uri: /priority
+    upstream_id: internal_httpbin
+    priority: 100
+    plugins:
+      proxy-rewrite:
+        uri: /anything?priority=100
+  - id: priority2
+    uri: /priority
+    upstream_id: internal_httpbin
+    priority: 50
+    plugins:
+      proxy-rewrite:
+        uri: /anything?priority=50
+
+  # vars (https://nginx.org/en/docs/http/ngx_http_core_module.html#variables)
+  - id: vars
+    uri: /vars
+    upstream_id: internal_httpbin
+    vars:
+      - [
+          AND, 
+          [ "arg_name", "==", "joe" ], 
+          [ "arg_age", ">", "18" ]
+        ]
+    plugins:
+      proxy-rewrite:
+        uri: /anything
+
+  # filter_func
+  - id: filter_func
+    uri: /filter_func
+    upstream_id: internal_httpbin
+    filter_func: |
+      function(vars)
+        local age = tonumber(vars.arg_age)
+        return age and age % 2 == 0
+      end
+    plugins:
+      proxy-rewrite:
+        uri: /anything
+
+  # timeout
+  - id: delay
+    uri: /delay/*
+    upstream_id: internal_httpbin
+    timeout:
+      connect: 2
+      send: 2
+      read: 2
+
+  # websocket
+  - id: websocket
+    uri: /websocket
+    upstream_id: internal_echo
+    enable_websocket: true
+    plugins:
+      proxy-rewrite:
+        uri: /.ws
+
+  # script
+  - id: script
+    uri: /script
+    upstream_id: internal_httpbin
+    script: |
+      local _M = {}
+
+      function _M.access(conf, ctx)
+        ngx.say('{"msg":"Hello from route script"}')
+      end
+
+      return _M
+
+  # status
+  - id: status
+    uri: /status
+    upstream_id: internal_httpbin
+    status: 0
+    plugins:
+      proxy-rewrite:
+        uri: /anything
+
+  # path parameters
+  - id: path_params
+    uri: /path_params/:param1/foo/:param2/bar
+    upstream_id: internal_httpbin
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - ^/path_params/(.*)/foo/(.*)/bar
+          - /anything?param1=$1&param2=$2
+
+#END
