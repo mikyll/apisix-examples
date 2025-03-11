@@ -1,6 +1,6 @@
-# APISIX Authorization Plugins
+# APISIX Generic
 
-This example shows how to setup and use most common authorization plugins.
+This example shows some interesting stuff you can do with APISIX Route resource.
 
 ## Setup
 
