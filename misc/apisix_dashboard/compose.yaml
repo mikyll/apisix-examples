@@ -1,0 +1,63 @@
+services:
+  etcd:
+    container_name: etcd-dashboard
+    image: bitnami/etcd:latest
+    restart: no
+    environment:
+      ALLOW_NONE_AUTHENTICATION: yes
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+    ports:
+      - "2379:2379"
+    healthcheck:
+      test: "etcdctl endpoint health"
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    networks:
+      apisix:
+
+  apisix:
+    container_name: apisix-dashboard
+    image: apache/apisix:latest
+    restart: no
+    depends_on:
+      etcd:
+        condition: service_healthy
+    volumes:
+      - ./conf_apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+    ports:
+      - "9080:9080/tcp"
+      - "9443:9443/tcp"
+      - "9180:9180/tcp"
+      - "9091:9091/tcp"
+      - "9092:9092/tcp"
+    networks:
+      apisix:
+
+  apisix-dashboard:
+    container_name: apisix-dashboard-gui
+    image: apache/apisix-dashboard:latest
+    restart: no
+    depends_on:
+      etcd:
+        condition: service_healthy
+    volumes:
+      - ./conf_dashboard/config.yaml:/usr/local/apisix-dashboard/conf/conf.yaml:ro
+    ports:
+      - "9000:9000"
+    networks:
+      apisix:
+
+  httpbin:
+    container_name: httpbin-dashboard
+    image: kennethreitz/httpbin:latest
+    restart: no
+    ports:
+      - "3000:80/tcp"
+    networks:
+      apisix:
+
+networks:
+  apisix:
+    driver: bridge

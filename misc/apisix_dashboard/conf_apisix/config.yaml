@@ -1,0 +1,32 @@
+apisix:
+  router:
+    http: radixtree_uri_with_parameter
+
+  node_listen: 9080
+  
+deployment:
+  admin:
+    admin_key_required: true
+    admin_key:
+      - name: admin
+        key: 1a8fe9bd-73ab-493c-ac82-44db40eab641
+        role: admin
+      - name: guest
+        key: ""
+        role: viewer
+
+    allow_admin:
+      - 127.0.0.0/24
+      - 0.0.0.0/0
+
+    admin_listen:
+      ip: 0.0.0.0
+      port: 9180
+
+  etcd:
+    host:
+      - http://etcd-dashboard:2379
+    prefix: "/apisix"
+    timeout: 30
+  
+#END
