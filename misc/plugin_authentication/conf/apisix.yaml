@@ -1,0 +1,90 @@
+upstreams:
+  # Upstream to internal service (hosted on Docker, accessible via bridged virtual network at http://httpbin-standalone:80 or http://localhost:3000)
+  - id: internal_httpbin
+    nodes:
+      "httpbin-plugin-authentication:80": 1
+    type: roundrobin
+
+consumers:
+  # Consumer for Key authentication, used for authenticating a route protected by API key auth
+  - username: "mike"
+    plugins:
+      key-auth:
+        key: "mike_key"
+
+  # Consumer for Basic authentication, used for authenticating a route protected by username/password
+  - username: "sasha"
+    plugins:
+      basic-auth:
+        username: "sasha_username"
+        password: "sasha_password"
+
+  # Consumer for JWT authentication (HS256), used for authenticating a route protected by JWT auth
+  - username: "joe"
+    plugins:
+      jwt-auth:
+        key: "joe_key"
+        algorithm: "HS256"
+        secret: "joe_secret"
+
+  # Consumer for JWT authentication (RS256), used for authenticating a route protected by JWT auth 
+  - username: "jeff"
+    plugins:
+      jwt-auth:
+        key: "jeff_key"
+        algorithm: "RS256"
+        public_key: |
+          -----BEGIN PUBLIC KEY-----
+          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1SU1LfVLPHCozMxH2Mo
+          4lgOEePzNm0tRgeLezV6ffAt0gunVTLw7onLRnrq0/IzW7yWR7QkrmBL7jTKEn5u
+          +qKhbwKfBstIs+bMY2Zkp18gnTxKLxoS2tFczGkPLPgizskuemMghRniWaoLcyeh
+          kd3qqGElvW/VDL5AaWTg0nLVkjRo9z+40RQzuVaE8AkAFmxZzow3x+VJYKdjykkJ
+          0iT9wCS0DRTXu269V264Vf/3jvredZiKRkgwlL9xNAwxXFg0x/XFw005UWVRIkdg
+          cKWTjpBP2dPwVZ4WWC+9aGVd+Gyn1o0CLelf4rEjGoXbAAEgAqeGUxrcIlbjXfbc
+          mwIDAQAB
+          -----END PUBLIC KEY-----
+
+routes:
+  # Simple route to internal service
+  - id: base_internal
+    uri: /*
+    upstream_id: internal_httpbin
+
+  # Route with Key authentication
+  - id: key_auth
+    uri: /key_auth/*
+    upstream_id: internal_httpbin
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - ^/key_auth/(.*)
+          - /$1
+      key-auth:
+        header: "X-My-Api-Key"
+        hide_credentials: true
+
+  # Route with Basic authentication
+  - id: basic_auth
+    uri: /basic_auth/*
+    upstream_id: internal_httpbin
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - ^/basic_auth/(.*)
+          - /$1
+      basic-auth:
+        hide_credentials: true
+
+  # Route with JWT authentication
+  - id: jwt_auth
+    uri: /jwt_auth/*
+    upstream_id: internal_httpbin
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - ^/jwt_auth/(.*)
+          - /$1
+      jwt-auth:
+        hide_credentials: true
+
+#END
