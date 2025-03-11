@@ -158,13 +158,13 @@ curl "localhost:9080/filter_func?age=20"
 Exceeding timeout:
 
 ```bash
-curl "localhost:9080/delay/3"
+curl "localhost:9080/timeout/3"
 ```
 
 Not exceeding timeout:
 
 ```bash
-curl "localhost:9080/delay/1"
+curl "localhost:9080/timeout/1"
 ```
 
 ### Websocket

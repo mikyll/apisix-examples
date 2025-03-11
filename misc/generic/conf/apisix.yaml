@@ -114,13 +114,18 @@ routes:
         uri: /anything
 
   # timeout
-  - id: delay
-    uri: /delay/*
+  - id: timeout
+    uri: /timeout/*
     upstream_id: internal_httpbin
     timeout:
       connect: 2
       send: 2
       read: 2
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - ^/timeout/(.*)
+          - /delay/$1
 
   # websocket
   - id: websocket
