@@ -23,5 +23,5 @@ curl -i "localhost:9080/anything"
 This route rewrites the request URL (removing the leading `/httpbin`) before forwarding it to the upstream:
 
 ```bash
-curl -i "localhost:9080/httpbin/anything"
+curl "localhost:9080/httpbin/anything"
 ```
