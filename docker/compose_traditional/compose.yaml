@@ -28,7 +28,6 @@ services:
         condition: service_healthy
     volumes:
       - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml:ro
-      - ../../apisix/plugins:/usr/local/apisix/apisix/plugins/custom/apisix/plugins
     ports:
       - "9080:9080/tcp"
       - "9443:9443/tcp"
