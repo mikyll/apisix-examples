@@ -1,0 +1,10 @@
+apisix:
+  router:
+    http: radixtree_uri_with_parameter
+
+deployment:
+  role: data_plane
+  role_data_plane:
+    config_provider: yaml
+  
+#END
