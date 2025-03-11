@@ -8,12 +8,12 @@ APISIX examples for different setups, configurations and plugins usage.
 
 ## Prerequisites
 
-- curl
-- wscat
-- jq
-- docker
-- kubectl
-- helm
+- `curl`
+- `wscat`
+- `jq`
+- `docker`
+- `kubectl`
+- `helm`
 
 > [!TIP]
 > To test Kubernetes examples locally, you must have a local Kubernetes cluster. I personally use [minikube](https://minikube.sigs.k8s.io/).
