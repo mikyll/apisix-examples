@@ -46,6 +46,20 @@ curl "localhost:9080/httpbin/ip"
 curl "localhost:9080/httpbin/uuid"
 ```
 
+### Methods
+
+Wrong method (GET):
+
+```bash
+curl -X GET "localhost:9080/method"
+```
+
+Correct method (PUT):
+
+```bash
+curl -X PUT "localhost:9080/method"
+```
+
 ### Multiple URIs
 
 ```bash

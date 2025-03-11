@@ -28,7 +28,6 @@ routes:
   - id: base_external
     uri: /get
     upstream_id: external_httpbin
-    methods: ["GET"]
   
   # Rewrite URI
   - id: httpbin_internal
@@ -39,6 +38,15 @@ routes:
         regex_uri:
           - ^/httpbin/(.*)
           - /$1
+  
+  # method
+  - id: method
+    uri: /method
+    upstream_id: internal_httpbin
+    methods: [ PUT ]
+    plugins:
+      proxy-rewrite:
+        uri: /anything
 
   # Multiple uris
   - id: multiple_uris
