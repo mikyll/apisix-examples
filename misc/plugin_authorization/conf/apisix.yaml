@@ -1,0 +1,70 @@
+upstreams:
+  # Upstream to internal service (hosted on Docker, accessible via bridged virtual network at http://httpbin-standalone:80 or http://localhost:3000)
+  - id: internal_httpbin
+    nodes:
+      "httpbin-plugin-authorization:80": 1
+    type: roundrobin
+
+consumers:
+  # Consumer for JWT authentication (HS256), used for authenticating a route protected by JWT auth
+  - username: "joe"
+    plugins:
+      jwt-auth:
+        key: "joe_key"
+        algorithm: "HS256"
+        secret: "joe_secret"
+
+  # Consumer for JWT authentication (RS256), used for authenticating a route protected by JWT auth 
+  - username: "jeff"
+    plugins:
+      jwt-auth:
+        key: "jeff_key"
+        algorithm: "RS256"
+        public_key: |
+          -----BEGIN PUBLIC KEY-----
+          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1SU1LfVLPHCozMxH2Mo
+          4lgOEePzNm0tRgeLezV6ffAt0gunVTLw7onLRnrq0/IzW7yWR7QkrmBL7jTKEn5u
+          +qKhbwKfBstIs+bMY2Zkp18gnTxKLxoS2tFczGkPLPgizskuemMghRniWaoLcyeh
+          kd3qqGElvW/VDL5AaWTg0nLVkjRo9z+40RQzuVaE8AkAFmxZzow3x+VJYKdjykkJ
+          0iT9wCS0DRTXu269V264Vf/3jvredZiKRkgwlL9xNAwxXFg0x/XFw005UWVRIkdg
+          cKWTjpBP2dPwVZ4WWC+9aGVd+Gyn1o0CLelf4rEjGoXbAAEgAqeGUxrcIlbjXfbc
+          mwIDAQAB
+          -----END PUBLIC KEY-----
+
+routes:
+  # Simple route to internal service
+  - id: base_internal
+    uri: /*
+    upstream_id: internal_httpbin
+
+  # Route with JWT authentication + consumer restriction (joe)
+  - id: jwt_auth_joe
+    uri: /jwt_auth/joe/*
+    upstream_id: internal_httpbin
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - ^/jwt_auth/joe/(.*)
+          - /$1
+      jwt-auth:
+        hide_credentials: true
+      consumer-restriction:
+        whitelist:
+          - joe
+
+  # Route with JWT authentication + consumer restriction (jeff)
+  - id: jwt_auth_jeff
+    uri: /jwt_auth/jeff/*
+    upstream_id: internal_httpbin
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - ^/jwt_auth/jeff/(.*)
+          - /$1
+      jwt-auth:
+        hide_credentials: true
+      consumer-restriction:
+        whitelist:
+          - jeff
+
+#END
