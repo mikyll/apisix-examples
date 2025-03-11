@@ -1,5 +1,5 @@
 upstreams:
-  # Upstream to internal service (hosted on Docker, accessible via bridged virtual network at http://httpbin-standalone:80 or http://localhost:3000)
+  # Upstream to internal service
   - id: internal_httpbin
     nodes:
       "httpbin-template:80": 1
@@ -8,7 +8,7 @@ upstreams:
 routes:
   # Simple route to internal service
   - id: base_internal
-    uri: /*
+    uri: /anything
     upstream_id: internal_httpbin
 
 #END
