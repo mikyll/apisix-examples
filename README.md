@@ -96,6 +96,10 @@ Folder: [`misc/plugin_authentication/`](misc/plugin_authentication/README.md)
 
 Folder: [`misc/plugin_authorization/`](misc/plugin_authorization/README.md)
 
+#### Replace Builtin Plugin
+
+Folder: [`misc/plugin_replace_builtin/`](misc/plugin_replace_builtin/README.md)
+
 <!-- GitHub Shields -->
 
 [apisix-shield]: https://custom-icon-badges.demolab.com/badge/APISIX-grey.svg?logo=apisix_logo
