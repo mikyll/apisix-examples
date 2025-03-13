@@ -1,4 +1,4 @@
-# APISIX Authorization Plugins
+# APISIX Replace Builtin Plugin
 
 This example shows how to replace a builtin plugin. In this case we are replacing the `jwt-auth` plugin to not require `exp` or `nbf` claims.
 
