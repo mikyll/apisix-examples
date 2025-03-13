@@ -1,0 +1,35 @@
+upstreams:
+  # Upstream to internal service
+  - id: internal_httpbin
+    nodes:
+      "httpbin-plugin-replace-builtin:80": 1
+    type: roundrobin
+
+consumers:
+  # Consumer for JWT authentication (HS256), used for authenticating a route protected by JWT auth
+  - username: "joe"
+    plugins:
+      jwt-auth:
+        key: "joe_key"
+        algorithm: "HS256"
+        secret: "joe_secret"
+
+routes:
+  # Simple route to internal service
+  - id: base_internal
+    uri: /anything
+    upstream_id: internal_httpbin
+
+  # Route with JWT authentication
+  - id: jwt_auth
+    uri: /jwt_auth/*
+    upstream_id: internal_httpbin
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - ^/jwt_auth/(.*)
+          - /$1
+      jwt-auth:
+        hide_credentials: true
+
+#END
