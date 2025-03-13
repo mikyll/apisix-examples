@@ -33,7 +33,7 @@ We have a JWT that doesn't include `exp` nor `nbf` claims in its payload:
 {
   "key": "joe_key",
   "sub": "1234567890",
-  "name": "Joe Doe",
+  "name": "John Doe",
   "iat": 1516239022
 }
 ```
