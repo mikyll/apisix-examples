@@ -1,0 +1,111 @@
+upstreams:
+  # Upstream to internal service
+  - id: httpbin_internal_upstream
+    nodes:
+      "httpbin-control-api:80": 5
+    type: roundrobin
+    checks:
+      # giving at least one child to checks.active enables active healthcheck
+      active:
+        timeout: 1
+        http_path: /status/200
+        healthy:
+          interval: 1
+          successes: 1
+          http_statuses:
+            - 200
+            - 302
+        unhealthy:
+          http_failures: 2
+          http_statuses:
+            - 429
+            - 404
+            - 500
+            - 501
+            - 502
+            - 503
+            - 504
+            - 505
+      passive:
+        healthy:
+          successes: 3
+          http_statuses:
+            - 200
+            - 201
+        unhealthy:
+          http_failures: 3
+          tcp_failures: 3
+          http_statuses:
+            - 500
+
+  # Fake upstream to verify healthcheck status
+  - id: broken_upstream
+    nodes:
+      "httpbin:80": 1
+    type: roundrobin
+    checks:
+      active:
+        type: http
+      # giving at least one child to checks.active enables active healthcheck
+      passive:
+        type: http
+
+services:
+  # Simple service that references internal upstream
+  - id: httpbin_internal_service
+    upstream_id: httpbin_internal_upstream
+
+routes:
+  # Simple route to internal service
+  - id: httpbin_internal_route
+    uri: /anything
+    service_id: httpbin_internal_service
+  
+  - id: httpbin_external_route
+    uri: /get
+    upstream:
+      scheme: https
+      nodes:
+        "httpbin.org": 5
+      type: roundrobin
+      checks:
+        # giving at least one child to checks.active enables active healthcheck
+        active:
+          timeout: 1
+          http_path: /status/200
+          healthy:
+            interval: 1
+            successes: 1
+            http_statuses:
+              - 200
+              - 302
+          unhealthy:
+            http_failures: 2
+            http_statuses:
+              - 429
+              - 404
+              - 500
+              - 501
+              - 502
+              - 503
+              - 504
+              - 505
+        passive:
+          healthy:
+            successes: 3
+            http_statuses:
+              - 200
+              - 201
+          unhealthy:
+            http_failures: 3
+            tcp_failures: 3
+            http_statuses:
+              - 500
+
+plugin_metadata:
+  - id: file-logger
+    log_format:
+      upstream_response_time: "$upstream_response_time"
+
+
+#END

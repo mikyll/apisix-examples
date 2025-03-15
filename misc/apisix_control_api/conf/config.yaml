@@ -1,0 +1,15 @@
+apisix:
+  router:
+    http: radixtree_uri_with_parameter
+
+  enable_control: true
+  control:
+    ip: 0.0.0.0
+    port: 9090
+
+deployment:
+  role: data_plane
+  role_data_plane:
+    config_provider: yaml
+
+#END
