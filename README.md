@@ -70,6 +70,10 @@ TODO
 
 ### Miscellaneous
 
+#### APISIX Control API
+
+Folder: [`misc/apisix_control_api/`](misc/apisix_control_api/README.md)
+
 #### APISIX Dashboard
 
 Folder: [`misc/apisix_dashboard/`](misc/apisix_dashboard/README.md)
