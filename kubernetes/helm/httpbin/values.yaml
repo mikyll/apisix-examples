@@ -1,0 +1,4 @@
+
+image:
+  name: kong/httpbin:0.2.1
+  pullPolicy: IfNotPresent
