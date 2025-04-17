@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apisix-config
+  namespace: apisix
+data:
+  config.yaml: |
+    apisix:
+      extra_lua_path: "/usr/local/apisix/apisix/plugins/custom/?.lua"
+      node_listen: 9080
+      enable_admin_cors: true
+      admin_key:
+        - name: "admin"
+          key: edd1c9f034335f136f87ad84b625c8f1
+          role: admin
+    deployment:
+      role: data_plane
+      role_data_plane:
+        config_provider: yaml
+    plugins:
+      - log
+      - jwt-auth-headers
+      - serverless-pre-function
+      - grpc-transcode
+      - limit-req
+      - limit-count
+      - proxy-rewrite
+      - ip-restriction
+      - response-rewrite
+    # nginx_config:
+    #   error_log_level: info

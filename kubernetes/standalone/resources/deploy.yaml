@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apisix
+  namespace: apisix
+  annotations:
+    reloader.stakater.com/auto: "true"
+    configmap.reloader.stakater.com/reload: "apisix-config,apisix-resources,apisix-custom-plugins"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apisix
+  template:
+    metadata:
+      labels:
+        app: apisix
+    spec:
+      containers:
+      - name: apisix
+        image: apache/apisix:3.12.0-debian
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        ports:
+        - containerPort: 9080
+          name: http
+        - containerPort: 9443
+          name: https
+        - containerPort: 9180
+          name: admin
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 9080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: config
+          mountPath: /usr/local/apisix/conf/config.yaml
+          subPath: config.yaml
+        - name: resources
+          mountPath: /usr/local/apisix/conf/apisix.yaml
+          subPath: apisix.yaml
+        - name: custom-plugins
+          mountPath: /usr/local/apisix/apisix/plugins/custom/apisix/plugins
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: apisix-config
+      - name: resources
+        configMap:
+          name: apisix-resources
+      - name: custom-plugins
+        configMap:
+          name: apisix-custom-plugins

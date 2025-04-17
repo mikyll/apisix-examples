@@ -1,0 +1,234 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: apisix
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apisix-config
+  namespace: apisix
+data:
+  config.yaml: |
+    apisix:
+      extra_lua_path: "/usr/local/apisix/apisix/plugins/custom/?.lua"
+      node_listen: 9080
+      enable_admin_cors: true
+      admin_key:
+        - name: "admin"
+          key: edd1c9f034335f136f87ad84b625c8f1
+          role: admin
+    deployment:
+      role: data_plane
+      role_data_plane:
+        config_provider: yaml
+    plugins:
+      - log
+      - jwt-auth-headers
+      - serverless-pre-function
+      - grpc-transcode
+      - limit-req
+      - limit-count
+      - proxy-rewrite
+      - ip-restriction
+      - response-rewrite
+    # nginx_config:
+    #   error_log_level: info
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apisix-custom-plugins
+  namespace: apisix
+data:
+  log.lua: |
+    local core = require("apisix.core")
+    
+    local plugin_name = "log"
+    
+    local _M = {
+        version = 0.1,
+        priority = 0,
+        name = plugin_name,
+    }
+    
+    _M.schema = {
+        type = "object",
+        properties = {},
+    }
+    
+    function _M.access(conf, ctx)
+        core.log.warn("log plugin triggered!")
+    end
+    
+    return _M
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apisix-resources
+  namespace: apisix
+data:
+  apisix.yaml: |
+    routes:
+      - id: 100
+        uri: /health
+        plugins:
+          serverless-pre-function:
+            phase: access
+            functions:
+              - |
+                return function(conf, ctx)
+                  ngx.say('APISIX is healthy')
+                  ngx.exit(200)
+                end
+      - id: 1
+        uri: /hello
+        upstream:
+          type: roundrobin
+          nodes:
+            "127.0.0.1:8080": 1
+        plugins:
+          response-rewrite:
+            headers:
+              set:
+                X-Config-Version: "v1"
+            body: "Hello from APISIX v1\n"
+
+      - id: test_route
+        uri: /anything
+        upstream:
+          type: roundrobin
+          nodes:
+            "httpbin.org": 1
+        plugins:
+          log:
+            _meta:
+              priority: 30000
+    #END
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apisix
+  namespace: apisix
+  annotations:
+    reloader.stakater.com/auto: "true"
+    configmap.reloader.stakater.com/reload: "apisix-config,apisix-resources,apisix-custom-plugins"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apisix
+  template:
+    metadata:
+      labels:
+        app: apisix
+    spec:
+      containers:
+      - name: apisix
+        image: apache/apisix:3.12.0-debian
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        ports:
+        - containerPort: 9080
+          name: http
+        - containerPort: 9443
+          name: https
+        - containerPort: 9180
+          name: admin
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 9080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: config
+          mountPath: /usr/local/apisix/conf/config.yaml
+          subPath: config.yaml
+        - name: resources
+          mountPath: /usr/local/apisix/conf/apisix.yaml
+          subPath: apisix.yaml
+        - name: custom-plugins
+          mountPath: /usr/local/apisix/apisix/plugins/custom/apisix/plugins
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: apisix-config
+      - name: resources
+        configMap:
+          name: apisix-resources
+      - name: custom-plugins
+        configMap:
+          name: apisix-custom-plugins
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpa
+  namespace: apisix
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: apisix
+  maxReplicas: 10
+  minReplicas: 2
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 75
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 120  
+      policies:
+      - type: Pods
+        value: 1 
+        periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apisix
+  namespace: apisix
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 9080
+    name: http
+  - port: 9180
+    targetPort: 9180
+    name: admin
+  selector:
+    app: apisix
+---

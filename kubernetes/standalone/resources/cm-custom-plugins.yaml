@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apisix-custom-plugins
+  namespace: apisix
+data:
+  log.lua: |
+    local core = require("apisix.core")
+    
+    local plugin_name = "log"
+    
+    local _M = {
+        version = 0.1,
+        priority = 0,
+        name = plugin_name,
+    }
+    
+    _M.schema = {
+        type = "object",
+        properties = {},
+    }
+    
+    function _M.access(conf, ctx)
+        core.log.warn("log plugin triggered!")
+    end
+    
+    return _M

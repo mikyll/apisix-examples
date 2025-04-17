@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apisix-resources
+  namespace: apisix
+data:
+  apisix.yaml: |
+    routes:
+      - id: 100
+        uri: /health
+        plugins:
+          serverless-pre-function:
+            phase: access
+            functions:
+              - |
+                return function(conf, ctx)
+                  ngx.say('APISIX is healthy')
+                  ngx.exit(200)
+                end
+      - id: 1
+        uri: /hello
+        upstream:
+          type: roundrobin
+          nodes:
+            "127.0.0.1:8080": 1
+        plugins:
+          response-rewrite:
+            headers:
+              set:
+                X-Config-Version: "v1"
+            body: "Hello from APISIX v1\n"
+
+      - id: test_route
+        uri: /anything
+        upstream:
+          type: roundrobin
+          nodes:
+            "httpbin.org": 1
+        plugins:
+          log:
+    #END
