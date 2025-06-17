@@ -1,8 +1,8 @@
+name: apisix-standalone
+
 services:
   apisix:
-    container_name: apisix-standalone
     image: apache/apisix:latest
-    restart: no
     stdin_open: true
     tty: true
     volumes:
@@ -15,9 +15,7 @@ services:
       apisix:
 
   httpbin:
-    container_name: httpbin-standalone
     image: kennethreitz/httpbin:latest
-    restart: no
     ports:
       - "3000:80/tcp"
     networks:
