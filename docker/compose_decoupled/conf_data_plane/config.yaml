@@ -11,8 +11,6 @@ deployment:
 
   etcd:
     host:
-      - http://etcd-decoupled:2379
+      - http://etcd:2379
     prefix: "/apisix"
     timeout: 30
-    
-#END

@@ -1,12 +1,11 @@
+name: apisix-decoupled
+
 services:
   etcd:
-    container_name: etcd-decoupled
     image: bitnami/etcd:latest
     restart: no
     environment:
       ALLOW_NONE_AUTHENTICATION: yes
-      ETCD_ADVERTISE_CLIENT_URLS: http://etcd-decoupled:2379
-      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
     ports:
       - "2379:2379"
     healthcheck:
@@ -18,7 +17,6 @@ services:
       apisix:
 
   apisix-data-plane:
-    container_name: apisix-decoupled-data-plane
     image: apache/apisix:latest
     restart: no
     depends_on:
@@ -33,7 +31,6 @@ services:
       apisix:
 
   apisix-control-plane:
-    container_name: apisix-decoupled-control-plane
     image: apache/apisix:latest
     restart: no
     depends_on:
@@ -49,7 +46,6 @@ services:
       apisix:
 
   httpbin:
-    container_name: httpbin-decoupled
     image: kennethreitz/httpbin:latest
     restart: no
     ports:
