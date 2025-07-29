@@ -1,20 +1,20 @@
 upstreams:
   # Upstream to internal service
-  - id: internal_httpbin
+  - id: httpbin_internal
     nodes:
-      "httpbin-standalone:80": 1
+      "httpbin:80": 1
     type: roundrobin
 
 routes:
   # Simple route to internal service
-  - id: base_internal
+  - id: internal_base
     uri: /anything
-    upstream_id: internal_httpbin
+    upstream_id: httpbin_internal
     
   # Rewrite URI
-  - id: httpbin_internal
+  - id: internal_rewrite
     uri: /httpbin/*
-    upstream_id: internal_httpbin
+    upstream_id: httpbin_internal
     plugins:
       proxy-rewrite:
         regex_uri:
