@@ -11,7 +11,7 @@ deployment:
         key: 1a8fe9bd-73ab-493c-ac82-44db40eab641
         role: admin
       - name: guest
-        key: ""
+        key: guest
         role: viewer
 
     allow_admin:
